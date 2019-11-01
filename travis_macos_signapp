@@ -32,7 +32,8 @@ if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
 
       security import ${CERTIFICATE_P12} -k ${KEY_CHAIN} -P ${CERTIFICATE_PASSWORD} -T /usr/bin/codesign;
 
-      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
+      # codesign doesn't need to be added in mojave or later version of macos
+      security set-key-partition-list -S apple-tool:,apple: -s -k ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
 
       # Remove certs
       rm -f ${CERTIFICATE_P12}
