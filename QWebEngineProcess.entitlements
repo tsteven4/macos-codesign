@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plist version="1.0">
+  <dict>
+<!-- this isn't enough, we need allow-unsigned-executable-memory
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+-->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+<!-- but we don't seen to need this one
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+-->
+  </dict>
+</plist>

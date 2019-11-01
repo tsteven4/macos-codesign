@@ -1,0 +1,59 @@
+#!/bin/bash -e
+
+set +x # Do not leak information
+
+if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+  if [ ! -z "${CERTIFICATE_PASSWORD}" ]; then
+    if [ ! -z "${CERTIFICATE_OSX_P12}" ]; then
+
+      KEY_CHAIN=build.keychain
+      KEY_CHAIN_PASSWORD=travis
+      CERTIFICATE_P12=certificate.p12
+      SIGNING_IDENTITY="Apple Development: tsteven4@gmail.com"
+
+      # Recreate the certificate from the secure environment variable
+      echo ${CERTIFICATE_OSX_P12} | base64 --decode > ${CERTIFICATE_P12}
+
+      # Create a keychain
+      # to cleanup "security delete-keychain ${KEY_CHAIN}
+      security create-keychain -p ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
+
+      # Make the keychain the default so identities are found
+      #  to restore the login keychain "security default-keychain -s login.keychain"
+      security default-keychain -s ${KEY_CHAIN}
+
+      # Unlock the keychain
+      security unlock-keychain -p ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
+
+      security import ${CERTIFICATE_P12} -k ${KEY_CHAIN} -P ${CERTIFICATE_PASSWORD} -T /usr/bin/codesign;
+
+      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
+
+      # Remove certs
+      rm -f ${CERTIFICATE_P12}
+
+      # sign everything without any entitlements
+      codesign -f -s "${SIGNING_IDENTITY}" --timestamp --options runtime --deep GPSBabelFE.app
+      # resign QtWebEngineProcess with entitlements it needs.
+      # test by selecting "More Options", and check "Preview in Google Maps"
+      # without the entitlements the cursor will hang never showing the map.
+      # reference: https://forum.qt.io/topic/102212/qtwebengine-signing-issues
+      # reference: https://forum.qt.io/topic/106949/qtwebengine-signing-issues
+      codesign -f -s "${SIGNING_IDENTITY}" --timestamp --options runtime --entitlements QWebEngineProcess.entitlements GPSBabelFE.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess 
+
+      # check signature
+      set -x
+      codesign -dvvv --verbose=4 GPSBabelFE.app
+      set +x
+
+      # clean-up
+      security default-keychain -s login.keychain
+      security delete-keychain ${KEY_CHAIN}
+    else
+      echo CERTIFICATE_OSX_P12 not set, can not sign application.
+    fi
+  else
+    echo CERTIFICATE_PASSWORD not set, can not sign application.
+  fi
+fi
+
