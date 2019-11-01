@@ -2,11 +2,6 @@
 
 set +x # Do not leak information
 
-# for debug get man page on mojave
-set -x
-man security -P cat
-set +x
-
 if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
   if [ ! -z "${CERTIFICATE_PASSWORD}" ]; then
     if [ ! -z "${CERTIFICATE_OSX_P12}" ]; then
@@ -30,9 +25,7 @@ if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
       # Unlock the keychain
       security unlock-keychain -p ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
 
-echo import
       security import ${CERTIFICATE_P12} -k ${KEY_CHAIN} -P ${CERTIFICATE_PASSWORD} -T /usr/bin/codesign;
-echo set key partition list
 
       # codesign doesn't need to be added in mojave or later version of macos
       security set-key-partition-list -S apple-tool:,apple: -s -k ${KEY_CHAIN_PASSWORD} ${KEY_CHAIN}
