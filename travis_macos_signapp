@@ -2,6 +2,11 @@
 
 set +x # Do not leak information
 
+# for debug get man page on mojave
+set -x
+man security -P cat
+set +x
+
 if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
   if [ ! -z "${CERTIFICATE_PASSWORD}" ]; then
     if [ ! -z "${CERTIFICATE_OSX_P12}" ]; then
