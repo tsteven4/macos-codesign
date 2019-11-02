@@ -4,8 +4,8 @@ set +x # Do not leak information
 
 if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
   if [ "${TRAVIS_EVENT_TYPE}" != "pull_request" ]; then
-    if [ ! -z "${CERTIFICATE_PASSWORD}" ]; then
-      if [ ! -z "${CERTIFICATE_OSX_P12}" ]; then
+    if [ ! -z "${CERTIFICATE_OSX_P12}" ]; then
+      if [ ! -z "${CERTIFICATE_PASSWORD}" ]; then
   
         KEY_CHAIN=build.keychain
         KEY_CHAIN_PASSWORD=travis
@@ -52,10 +52,10 @@ if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
         security default-keychain -s login.keychain
         security delete-keychain ${KEY_CHAIN}
       else
-        echo CERTIFICATE_OSX_P12 not set, can not sign application.
+        echo CERTIFICATE_PASSWORD not set, can not sign application.
       fi
     else
-      echo CERTIFICATE_PASSWORD not set, can not sign application.
+      echo CERTIFICATE_OSX_P12 not set, can not sign application.
     fi
   fi
 fi
